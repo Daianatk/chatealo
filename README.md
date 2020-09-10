@@ -1,2 +1,2 @@
-# chatealo
+# Chatealo
 Chat App

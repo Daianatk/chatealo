@@ -1,2 +1,2 @@
 # Chatealo
-Realtime Chat - Socket.io, NodeJS & Express
+Realtime Chat - WebSockets, NodeJS & Express

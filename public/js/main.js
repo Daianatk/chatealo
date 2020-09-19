@@ -33,7 +33,13 @@ chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
     // Obtener el texto del mensaje
-    const msg = e.target.elements.msg.value;
+    let msg = e.target.elements.msg.value;
+  
+    msg = msg.trim();
+    
+    if (!msg){
+      return false;
+    }
 
     //Emite mensaje al servidor
     socket.emit('chatMessage' , msg);
@@ -47,12 +53,17 @@ chatForm.addEventListener('submit', (e) => {
 function outputMessage(message) {
     const div = document.createElement('div');
     div.classList.add('message');
-    div.innerHTML= `<p class="meta">${message.username} <span>${message.time}</span></p>
-    <p class="text">
-    ${message.text}
-    </p>`;
+    const p = document.createElement('p');
+    p.classList.add('meta');
+    p.innerText = message.username;
+    p.innerHTML += `<span>${message.time}</span>`;
+    div.appendChild(p);
+    const para = document.createElement('p');
+    para.classList.add('text');
+    para.innerText = message.text;
+    div.appendChild(para);
     document.querySelector('.chat-messages').appendChild(div);
-}
+  }
 
 //Agregando nombre de la sala en el DOM
 function outputRoomName(room) {
@@ -61,7 +72,10 @@ function outputRoomName(room) {
 
 //Agregando usuarios al DOM
 function outputUsers(users) {
-    userList.innerHTML = `
-    ${users.map(user => `<li>${user.username}</li>`).join()}
-    `;
-}
+    userList.innerHTML = '';
+    users.forEach(user=>{
+      const li = document.createElement('li');
+      li.innerText = user.username;
+      userList.appendChild(li);
+    });
+   }

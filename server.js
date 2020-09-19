@@ -14,50 +14,57 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const botName = 'Chatealo Bot';
 
-//Se ejecuta cuando el cliente se conecta
+// Se ejecuta cuando un cliente se conecta
 io.on('connection', socket => {
     socket.on('joinRoom', ({ username, room }) => {
-        const user = userJoin(socket.id, username, room);
-
-        socket.join(user.room);
-    
-
-    // Bienvenido para el usuario actual
-    socket.emit('message', formatMessage (botName, 'Bienvenido a Chatealo!'));
-
-    // Se ejecuta cuando un usuario se conecta
-    socket.broadcast
-    .to(user.room)
-    .emit(
-        'message', 
-        formatMessage (botName, `${user.username}, ingreso a chatealo`)
+      const user = userJoin(socket.id, username, room);
+  
+      socket.join(user.room);
+  
+      // Bienvenida al usuario
+      socket.emit('message', formatMessage(botName, 'Bienvenido a Chatealo!'));
+  
+      // Se ejecuta cuando un usuario entra a la sala
+      socket.broadcast
+        .to(user.room)
+        .emit(
+          'message',
+          formatMessage(botName, `${user.username} a ingresado a Chatealo`)
         );
+  
+      // Muestra el usuaio y la información de la sala
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
     });
-
-    //Escucha el mensaje de chat
+  
+    // Escuchando los mensajes de chatealo
     socket.on('chatMessage', msg => {
-        const user = getCurrentUser(socket.id);
-
-        io.to(user.room).emit('message' , formatMessage (user.username, msg));
+      const user = getCurrentUser(socket.id);
+  
+      io.to(user.room).emit('message', formatMessage(user.username, msg));
     });
-
-    //Se ejecuta cuando el cliente se desconecta
+  
+    // Se muestra cuando el usuario se desconecta
     socket.on('disconnect', () => {
-        const user = userLeave(socket.id);
-
-        if(user) {
-        io.to(user.room).emit('message', formatMessage (botName,`${user.username} salió de chatealo`)
-        )};
-
-        //Enviando información de usuario y sala
+      const user = userLeave(socket.id);
+  
+      if (user) {
+        io.to(user.room).emit(
+          'message',
+          formatMessage(botName, `${user.username} a dejalo la sala del chat`)
+        );
+  
+        // Muestra el usuario y la informacion de la sala
         io.to(user.room).emit('roomUsers', {
-            room: user.room,
-            users: getRoomUsers(user.room)
+          room: user.room,
+          users: getRoomUsers(user.room)
         });
+      }
     });
-
-});
+  });
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => console.log(`Server runing on port ${PORT}`));
+server.listen(PORT, () => console.log(`El servidor esta corriendo en el puerto ${PORT}`));
